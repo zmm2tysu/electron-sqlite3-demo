@@ -19,7 +19,7 @@ function updateToSchemaVersion1(
     // table users
     db.exec(`
       CREATE TABLE ${tables.tt_users} (
-        id VARCHAR(30) PRIMARY KEY,
+        id INTEGER PRIMARY KEY,
         nickname VARCHAR(128) NOT NULL,
         avatar TEXT NOT NULL,
         mcnId VARCHAR(30) NULL,

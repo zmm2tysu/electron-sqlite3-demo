@@ -1,11 +1,10 @@
 import { ipcRenderer } from 'electron';
-import Logging from '../scripts/logging_render';
+import log from 'electron-log';
 import { explodePromise } from '../utils/explode_promise';
 import createTaskWithTimeout from '../utils/task_with_timeout';
 
 const SQL_CHANNEL_KEY = 'sql-channel';
 
-const log = Logging().getLogger();
 
 let activeJobCount = 0;
 let resolveShutdown: (() => void) | undefined;

@@ -1,18 +1,14 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { BrowserWindow, app, ipcMain, shell } from 'electron'
+import logger from 'electron-log'
 import { join } from 'path'
-import { initialize as SQLChannelsInitialize } from './db/sqlChannel'
 
 import icon from '../../resources/icon.png?asset'
 import { MainSQL } from './db/main'
-import sqlServer from './db/server'
-import Logging from './scripts/logging'
-
-const sql = new MainSQL()
-const { getLogger } = Logging()
-const logger = getLogger()
+import { initialize as SQLChannelsInitialize } from './db/sqlChannel'
 
 async function initializeSQL(
+  sql: any,
   userDataPath: string
 ): Promise<{ ok: true; error: undefined } | { ok: false; error: Error }> {
   try {
@@ -44,11 +40,9 @@ function createWindow(): void {
       sandbox: false
     }
   })
+  logger.info('window created')
 
   mainWindow.on('ready-to-show', () => {
-    setTimeout(() => {
-      sqlServer.getUsers()
-    }, 3000)
     mainWindow.show()
   })
 
@@ -69,7 +63,9 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  logger.initialize({ preload: true })
+  logger.info('app is ready')
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -79,14 +75,20 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+  const sql = new MainSQL()
 
-  initializeSQL(app.getPath('userData'))
+  await initializeSQL(sql, app.getPath('userData'))
   SQLChannelsInitialize(sql)
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
+
+  setTimeout(async () => {
+    const users = await sql.sqlCall('getUsers', [false])
+    logger.info({ users })
+  }, 3000)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

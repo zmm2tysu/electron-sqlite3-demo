@@ -1,4 +1,4 @@
-import Logging from '../scripts/logging_render';
+import log from 'electron-log';
 import { explodePromise } from './explode_promise';
 export const SECOND = 1000;
 const MINUTE = SECOND * 60;
@@ -16,8 +16,6 @@ export function toLogFormat(error: unknown): string {
 
   return String(error);
 }
-
-const log = Logging().getLogger();
 
 type TaskType = {
   id: string;

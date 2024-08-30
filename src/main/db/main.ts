@@ -1,3 +1,4 @@
+import eLog from 'electron-log'
 import { format } from 'util'
 import { Worker } from 'worker_threads'
 
@@ -82,6 +83,7 @@ export class MainSQL {
     //   ? join(__dirname, 'mainWorker.ts')
     //   : join(__dirname, 'mainWorker.ts')
     this.worker = mainWorker({})
+    eLog.info('MainSQL constructor', { worker: this.worker })
 
     // 监听子线程发出的消息的事件
     this.worker.on('message', (wrappedResponse: WrappedWorkerResponse) => {
@@ -108,10 +110,13 @@ export class MainSQL {
     this.onExit = new Promise<void>((resolve) => {
       this.worker.once('exit', resolve)
     })
+    eLog.info('MainSQL constructor end', { worker: this.worker })
   }
 
   // 开始初始化
   public async initialize({ configDir, key, logger }: InitializeOptions) {
+    eLog.info('MainSQL initialize start', { worker: this.worker })
+
     if (this.isReady || this.onReady) {
       throw new Error('Already initialized')
     }
@@ -124,6 +129,7 @@ export class MainSQL {
 
     this.onReady = undefined
     this.isReady = true
+    eLog.info('MainSQL initialize end', { worker: this.worker })
   }
 
   // 关闭数据库的方法
@@ -176,8 +182,9 @@ export class MainSQL {
       seq,
       request
     }
-    this.worker.postMessage(wrappedRequest)
 
+    eLog.info('MainSQL send postMessage', { worker: this.worker })
+    this.worker.postMessage(wrappedRequest)
     return result
   }
 }

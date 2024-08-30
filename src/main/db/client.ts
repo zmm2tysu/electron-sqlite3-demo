@@ -1,10 +1,8 @@
+import log from 'electron-log';
 import { get, has } from 'lodash';
 import { doShutdown, ipcInvoke } from '../scripts/channels';
-import Logging from '../scripts/logging_render';
 
 import type { ClientInterface, ServerInterface } from './types';
-
-const log = Logging().getLogger();
 
 const channels: ServerInterface = new Proxy({} as ServerInterface, {
   get(_target, name) {
